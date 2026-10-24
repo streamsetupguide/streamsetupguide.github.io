@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto-download new episodes to TorBox from your Trakt watchlist</title>
+<meta name="description" content="The Trakt → showrss → TorBox pipeline for hands-off TV: new episodes of your shows land in your debrid cloud automatically, in the best quality available. Including the RSS gotchas nobody documents.">
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--dim:#9aa0a6;--acc:#4f8cff;--card:#171a21;--line:#262a33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);max-width:760px;margin:0 auto;padding:24px 20px 80px}
+header{padding:36px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px}
+h1{font-size:1.8rem;line-height:1.25;letter-spacing:-.02em}
+header p{color:var(--dim);margin-top:10px}
+h2{font-size:1.3rem;margin:40px 0 12px}
+h3{font-size:1.05rem;margin:24px 0 8px}
+p,li{color:var(--fg)}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:var(--card);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.9em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+ol li,ul li{margin:8px 0 8px 22px}
+.dim{color:var(--dim)}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:.9em}
+.badge{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.8em;color:var(--dim);margin-right:6px}
+nav{margin:0 0 10px;font-size:.9em}
+</style>
+</head>
+<body>
+<nav><a href="/">&#8592; TorBox Setup Guide</a> · <a href="/addons.html">Addon comparison</a></nav>
+<header>
+<span class="badge">Guide</span><span class="badge">Automation</span>
+<h1>New episodes, zero clicks: the Trakt → TorBox auto-download pipeline</h1>
+<p>Add a show to your Trakt watchlist; new episodes appear in your TorBox cloud in the best quality that exists — automatically. This is the full working recipe, including the two gotchas that break everyone's setup.</p>
+</header>
+
+<h2>What you're building</h2>
+<div class="card"><strong>Trakt watchlist</strong> (your "want list") → <strong>showrss</strong> (per-show episode feeds with magnets) → <strong>TorBox RSS</strong> (auto-download into your cloud) — with a small polling script as the reliability backstop. Result: Tuesday's episode is in your cloud Tuesday night, cached and streamable, without you touching anything.</div>
+
+<h2>Step 1 — Trakt as the source of truth</h2>
+<p>Trakt is just the nicest place to maintain "shows I follow." Any tracker works, but Trakt's watchlist + history (which the pruning step later uses) is the cleanest. Add shows to your watchlist as you discover them — that's the entire manual part of this system.</p>
+
+<h2>Step 2 — showrss feeds per show</h2>
+<p><a href="https://showrss.info" rel="noopener">showrss.info</a> publishes one RSS feed per TV show, with magnet links per episode release. Free, no account needed.</p>
+<ol>
+<li>Search your show on showrss, grab its feed URL (looks like <code>showrss.info/show/1234.rss</code>).</li>
+<li>Prefer the "full show" feed — it carries every new episode automatically.</li>
+</ol>
+<p class="dim">Reality check: showrss covers scene-released shows well. Reality/variety shows (especially regional ones) often never appear — those stay manual.</p>
+
+<h2>Step 3 — wire it into TorBox</h2>
+<p>TorBox Pro includes unlimited RSS feeds: dashboard → RSS, add each show's feed. Two settings matter:</p>
+<ul>
+<li><strong>Filter (do-regex):</strong> use the SHOW NAME, nothing fancier. The feed is already show-specific.</li>
+<li><strong>Quality:</strong> feeds carry 2160p/1080p/720p releases of the same episode — decide whether TorBox should take everything (you'll get duplicates in multiple qualities) or you filter in the next step.</li>
+</ul>
+
+<h2>⚠️ Gotcha #1 — the filter format trap</h2>
+<div class="card">showrss titles episodes as <code>Show 2x10</code> — not <code>Show S02E10</code>. If you write a filter like <code>Show S02E*</code>, it will <strong>never match a single episode</strong>, while the feed reports "checked successfully." This is the silent killer: everything looks healthy, nothing ever downloads. Filter on the show name only.</div>
+
+<h2>⚠️ Gotcha #2 — TorBox's feed fetcher can silently ingest nothing</h2>
+<p>As of late 2026, there are periods where TorBox's server-side fetcher retrieves showrss feeds but ingests zero items — status says "checked successfully," the source feed demonstrably has new episodes, nothing lands. It's on their side. The fix that makes the system dependable:</p>
+
+<h2>Step 4 — the 20-line backstop script</h2>
+<p>Poll the feeds yourself and add magnets via TorBox's API (free tier of any scheduler works — a cron job, GitHub Action, a Raspberry Pi):</p>
+<ol>
+<li>Every few hours, fetch each show'3 showrss feed.</li>
+<li>Parse items: title + magnet link.</li>
+<li>Pick the <strong>best quality per episode</strong> (one copy only — 2160p preferred, and skip "AI upscaled" releases: a native 2160p WEB-DL with Dolby Vision beats an upscaled 4320p re-encode every time).</li>
+<li>Check your existing torrents (match on season/episode parsed from titles) — skip what you have.</li>
+<li>Add new magnets via <code>POST /torrents/createtorrent</code>.</li>
+</ol>
+<p>That's genuinely the whole thing. Two extra behaviors worth adding: <em>auto-upgrade</em> (if a better quality of an episode you hold appears later, add it and delete the lesser copy) and a <em>watched-episode pruner</em> (Trakt history → delete watched episodes → keeps your slot count sane).</p>
+
+<h2>Why this beats manual adding</h2>
+<ul>
+<li>Episodes are often <strong>cached</strong> by the time you sit down — instant playback.</li>
+<li>No more "did I grab this week's episode" — the answer is always yes.</li>
+<li>Works for seasonal binges: add the show once, get every week's episode for months.</li>
+</ul>
+
+<h2>Cost note</h2>
+<p>This all runs on TorBox Pro's included features (unlimited RSS, API access). If you're setting up a new account: signup through a referral link adds bonus days for both sides — <a href="https://torbox.app/subscription?referral=8ff32e87-03eb-4b24-91f9-b1e05f3aa04d" rel="noopener">here's mine</a>, or grab any code from the community pool on the <a href="/">main guide page</a>.</p>
+
+<footer>
+<p>Independent guide — not affiliated with TorBox, Trakt, or showrss. One referral link, disclosed above. <a href="/">Main guide</a> · <a href="/addons.html">Addon comparison</a></p>
+</footer>
+</body>
+</html>
