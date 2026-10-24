@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TorBox Setup Guide — Stremio, referrals, and the cheap-months math</title>
+<meta name="description" content="A no-hype guide to TorBox: what it is, setting it up with Stremio in 5 minutes, how referral bonus days work, and the math that gets streaming down to a couple of dollars a month.">
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--dim:#9aa0a6;--acc:#4f8cff;--card:#171a21;--line:#262a33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);max-width:760px;margin:0 auto;padding:24px 20px 80px}
+header{padding:36px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px}
+h1{font-size:1.9rem;line-height:1.25;letter-spacing:-.02em}
+header p{color:var(--dim);margin-top:10px}
+h2{font-size:1.3rem;margin:40px 0 12px;letter-spacing:-.01em}
+h3{font-size:1.05rem;margin:24px 0 8px}
+p,li{color:var(--fg)}
+p+p,ul,ol{margin-top:10px}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:var(--card);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.9em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+.card strong{color:#fff}
+ol li,ul li{margin:8px 0 8px 22px}
+.dim{color:var(--dim)}
+.cta{display:inline-block;background:var(--acc);color:#fff;font-weight:600;padding:12px 22px;border-radius:10px;margin:8px 0}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95em}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:var(--card)}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:.9em}
+.badge{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.8em;color:var(--dim);margin-right:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">Guide</span><span class="badge">Updated for 2026</span>
+  <h1>TorBox, explained honestly — setup, Stremio, referral days, and the cheap-months math</h1>
+  <p>No affiliate spam, no invented discounts. What TorBox actually does, how to set it up in five minutes, and how people get their effective cost down to a couple of dollars a month.</p>
+</header>
+
+<h2>What TorBox is</h2>
+<p>TorBox is a <strong>debrid service</strong>: it downloads torrents and Usenet posts on its own servers, and you stream or download the result directly — fast, private, and without seeding anything yourself. Its most popular use is powering <strong>Stremio</strong> (and similar apps) so streaming feels like a normal on-demand app instead of a torrent client.</p>
+<ul>
+  <li><strong>Torrents + Usenet + web hosters</strong> in one subscription</li>
+  <li><strong>Instant caching</strong> — popular releases are usually already on their servers, so playback starts immediately</li>
+  <li><strong>One-time plans exist</strong> (buy 3/6/12 months, no auto-renew) — this matters for the math below</li>
+  <li>Cloud features: 1&nbsp;TB AirLock storage, S3-compatible access (T3), unlimited RSS feeds</li>
+</ul>
+
+<h2>Setup in 5 minutes (TorBox → Stremio)</h2>
+<ol>
+  <li>Create a TorBox account. <span class="dim">Tip: signing up through a referral link adds free bonus days to your first plan — both sides get extra days (mine is further down, use any one you find, the bonus is the same).</span></li>
+  <li>In TorBox: <strong>Settings → API Key</strong> → copy the key.</li>
+  <li>Install <a href="https://www.stremio.com" rel="noopener">Stremio</a> (free, all platforms).</li>
+  <li>Add an addon that talks to TorBox. The beginner-friendly path is <a href="https://easy-torbox.github.io/stremio/" rel="noopener">EasyTorbox</a> — paste your API key, it builds your install link automatically. Power users run <a href="https://github.com/pythonsoon/AIOStreams" rel="noopener">AIOStreams</a> (more control, more setup) or Comet/Torrentio with the TorBox provider.</li>
+  <li>Search any title in Stremio → pick the TorBox source → it plays.</li>
+</ol>
+<div class="card"><strong>That's genuinely it.</strong> The "hard" part people overthink is the addon step — EasyTorbox exists precisely because of that. Five minutes, no server, no VPN needed for streaming (the streams come from TorBox's infrastructure).</div>
+
+<h2>How referral days work (the honest version)</h2>
+<p>TorBox's referral program gives <strong>both sides bonus days</strong>: the new signup gets extra days added to their new plan, and the referrer gets days when a purchase completes. It stacks with normal plan time — your expiry date simply moves forward.</p>
+<ul>
+  <li>Referral links look like <code>torbox.app/subscription?referral=UUID</code></li>
+  <li>The bonus applies at purchase, not signup — an account created via referral still needs to buy a plan for days to land</li>
+  <li>There's a community <a href="https://easy-torbox.github.io/stremio/ref-stats.html" rel="noopener">referral rotation pool</a> where codes take turns — using any code from it helps someone and costs you nothing</li>
+</ul>
+<p><strong>If this guide helped and you're signing up anyway:</strong> <a class="cta" href="https://torbox.app/subscription?referral=8ff32e87-03eb-4b24-91f9-b1e05f3aa04d" rel="noopener">create your account here (my referral link)</a></p>
+<p class="dim">Full transparency: that's my referral link — your new plan gets its bonus days, and I get a few days on mine. That's the whole deal. If you'd rather not, torbox.app directly works identically minus the bonus.</p>
+
+<h2>The cheap-months math (why people stack plans)</h2>
+<p>Because TorBox sells <strong>one-time plans</strong> and <strong>time stacks</strong>, the community's favorite game is buying time cheaply and letting it accumulate:</p>
+<ol>
+  <li><strong>Buy during sales.</strong> Black Friday historically knocks 30%+ off annual plans — and the discount locks for the life of the subscription in some years, while one-time plans just get cheaper outright.</li>
+  <li><strong>Stack, don't replace.</strong> Buying another plan while you have time left <em>adds</em> to your expiry (existing time + new time). People cancel-and-rebuy only when a sale requires it — check terms each time.</li>
+  <li><strong>Referral days are free time.</strong> A handful of referrals per year can add weeks on top.</li>
+  <li><strong>Do the division at checkout.</strong> The play: (plan price ÷ days covered) × 30 = your effective monthly cost. Annual plans during a 30% sale plus referral days are how people quote numbers like "under $2/month" — that math is real, but only during sale windows.</li>
+</ol>
+<table>
+  <tr><th>Move</th><th>Effect</th></tr>
+  <tr><td>Buy annual during BF sale</td><td>Lowest per-day price of the year</td></tr>
+  <tr><td>Buy while time remains</td><td>Dates stack — nothing is lost</td></tr>
+  <tr><td>Sign up / buy via referral</td><td>Bonus days on top, both sides</td></tr>
+  <tr><td>Wait for a sale if you can</td><td>Non-urgent renewals timed to sales save 20–30%</td></tr>
+</table>
+
+<h2>FAQ from real community questions</h2>
+<h3>Is Usenet included?</h3>
+<p>Yes, Usenet downloads are part of the subscription (high-speed backend). Note that TorBox's built-in Usenet <em>search</em> has had periods of being unavailable — external NZB indexers still work fine for finding content, TorBox handles the download.</p>
+<h3>What's AirLock / T3?</h3>
+<p>AirLock is your personal cloud slice (1 TB) where downloads land and stay. T3 is S3-compatible read access to it — you can mount your TorBox storage with rclone or any S3 tool and stream your own media library from it (read-only).</p>
+<h3>Is this legal?</h3>
+<p>TorBox is a legitimate cloud service — what you download through it is on you, same as any downloader. It's popular in the Stremio ecosystem because it's fast and dead simple.</p>
+<h3>Free plan?</h3>
+<p>Yes — limited, and useful for testing the setup before paying anything. Recent policy changes restrict some free-tier features (e.g., large cached torrents), so treat it as a trial, not a lifestyle.</p>
+
+<footer>
+  <p>Independent guide — not affiliated with TorBox. Contains one referral link (disclosed above). Pricing and promos change; verify at <a href="https://torbox.app" rel="noopener">torbox.app</a> before buying.</p>
+</footer>
+
+</body>
+</html>
