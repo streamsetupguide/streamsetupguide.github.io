@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://streamsetupguide.github.io/sitemap.xml
