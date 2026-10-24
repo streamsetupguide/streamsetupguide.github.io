@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EasyTorbox vs AIOStreams vs Comet — which TorBox addon for Stremio?</title>
+<meta name="description" content="Actually-used comparison of the three popular TorBox addon paths for Stremio: EasyTorbox, AIOStreams, and Comet/Torrentio — setup effort, caching speed, catalog quality, and who each is for.">
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--dim:#9aa0a6;--acc:#4f8cff;--card:#171a21;--line:#262a33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);max-width:760px;margin:0 auto;padding:24px 20px 80px}
+header{padding:36px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px}
+h1{font-size:1.8rem;line-height:1.25;letter-spacing:-.02em}
+header p{color:var(--dim);margin-top:10px}
+h2{font-size:1.3rem;margin:40px 0 12px}
+h3{font-size:1.05rem;margin:24px 0 8px}
+p,li{color:var(--fg)}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:var(--card);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.9em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+ol li,ul li{margin:8px 0 8px 22px}
+.dim{color:var(--dim)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95em}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:var(--card)}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:.9em}
+.badge{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.8em;color:var(--dim);margin-right:6px}
+nav{margin:0 0 10px;font-size:.9em}
+</style>
+</head>
+<body>
+<nav><a href="/">&#8592; TorBox Setup Guide</a></nav>
+<header>
+<span class="badge">Guide</span><span class="badge">Hands-on</span>
+<h1>EasyTorbox vs AIOStreams vs Comet — which TorBox addon should you actually use?</h1>
+<p>All three tried on a real TorBox Pro account, on real hardware, for months — not a feature-list regurgitation. Here's who each one is for and where each one hurts.</p>
+</header>
+
+<h2>The 10-second answer</h2>
+<div class="card"><strong>New to this? EasyTorbox.</strong> Want one addon that aggregaes everything with heavy filtering? <strong>AIOStreams</strong> (with a wizard config). Want the lightest, fastest scraper with zero setup? <strong>Comet</strong> (or Torrentio with the TorBox provider). Power users end up running AIOStreams with Comet as a fallback — that's the honest endgame.</div>
+
+<h2>EasyTorbox — the on-ramp</h2>
+<p>A community web tool: paste your TorBox API key, pick a couple of toggles, it builds your Stremio install link automatically. You never see a config file.</p>
+<ul>
+<li><strong>Setup:</strong> ~2 minutes. Genuinely non-technical.</li>
+<li><strong>Catalog:</strong> solid defaults (Netflix-style layouts, sensible quality caps). Not customizable beyond its toggles.</li>
+<li><strong>Caching:</strong> good — it prefers cached results so playback starts fast.</li>
+<li><strong>Hurts when:</strong> you want unusual filters (specific release groups, per-genre quality rules, addon stacking). You'll outgrow it — and that's fine; it's designed as the on-ramp.</li>
+</ul>
+<p>Start here: <a href="https://easy-torbox.github.io/stremio/" rel="noopener">easy-torbox.github.io/stremio</a>. Their <a href="https://easy-torbox.github.io/stremio/ref-stats.html" rel="noopener">community referral pool</a> is also the friendliest way to grab a TorBox signup bonus — and <a href="/">my referral link is on the main guide page</a> if you'd rather help a specific human.</p>
+
+<h2>AIOStreams — the workstation</h2>
+<p>A self-hostable (or free-instances) meta-addon: it sits between Stremio and your actual scrapers, merges results, and applies deep filtering — then formats everything into pretty catalogs.</p>
+<ul>
+<li><strong>Setup:</strong> 20–45 minutes done right. Community wizard configs (e.g. Tamtaro) cut this down but you still need to understand what you enabled.</li>
+<li><strong>Catalog:</strong> the best there is — AppleTV-style formatter layouts, per-quality caps, debrid-locked results, precache/preload options so episodes are ready before you click.</li>
+<li><strong>Caching:</strong> excellent when you enable precache; the first scrape is slower, everything after is instant.</li>
+<li><strong>Hurts when:</strong> something breaks mid-config and you're staring at a JSON blob. It also runs as a service — the free public instances can be busy at peak hours. If you self-host it on a small VPS or even a Raspberry Pi, it's rock solid.</li>
+</ul>
+<p>Real talk from mnths of use: the <em>AppleTV formatter + precache + preload</em> combo is what makes Stremio feel like a $15/mo streaming service instead of a torrent client. Worth every minute of setup.</p>
+
+<h2>Comet — the speedrun</h2>
+<p>A lightweight scraper addon with built-in debrid support. No meta layer, no fancy catalogs — it searches, sorts by the debrid's cache, shows you results.</p>
+<ul>
+<li><strong>Setup:</strong> 1 minute. Install, paste API key, done.</li>
+<li><strong>Catalog:</strong> a plain list, sorted well. Functional, not pretty.</li>
+<li><strong>Caching:</strong> its whole personality — cache-first ordering means the top result almost always plays instantly.</li>
+<li><strong>Hurts when:</strong> you want ANY filtering beyond quality caps, or pretty browse catalogs. It's a search tool, not a library experience.</li>
+</ul>
+
+<h2>Side by side</h2>
+<table>
+<tr><th></th><th>EasyTorbox</th><th>AIOStreams</th><th>Comet</th></tr>
+<tr><td>Setup time</td><td>2 min</td><td>20–45 min</td><td>1 min</td></tr>
+<tr><td>Catalog quality</td><td>Good, fixed</td><td>Best-in-class</td><td>Plain list</td></tr>
+<tr><td>Filtering depth</td><td>Basic toggles</td><td>Deep (regex-able)</td><td>Quality caps only</td></tr>
+<tr><td>Instant-play bias</td><td>Good</td><td>Excellent (precache)</td><td>Excellent (cache-first)</td></tr>
+<tr><td>Best for</td><td>First-timers</td><td>Set-and-forget power users</td><td>Minimalists / fallback</td></tr>
+</table>
+
+<h2>The endgame setup (what we run)</h2>
+<ol>
+<li>AIOStreams with a hardened community config (AppleTV formatter, 4K-allowed on big screen stuff, precache on).</li>
+<li>Comet installed as the fallback when AIOStreams' instance is busy.</li>
+<li>TorBox settings: 10 slots respected, RSS feeds for weekly shows so episodes land automatically (the <a href="/">main guide</a> covers the Trakt→RSS trick).</li>
+</ol>
+<p class="dim">And yes — one disclosure, same as the main guide: if you're signing up to TorBox and want the bonus days for both of us, <a href="https://torbox.app/subscription?referral=8ff32e87-03eb-4b24-91f9-b1e05f3aa04d" rel="noopener">here's my referral link</a>. Works identically without it, minus the free days.</p>
+
+<footer>
+<p>Independent comparison — not affiliated with TorBox, EasyTorbox, AIOStreams, or Comet. Contains one referral link (disclosed above). <a href="/">Back to the main TorBox guide</a>.</p>
+</footer>
+</body>
+</html>
