@@ -64,7 +64,7 @@ nav{margin:0 0 10px;font-size:.9em}
 <h2>Step 4 — the 20-line backstop script</h2>
 <p>Poll the feeds yourself and add magnets via TorBox's API (free tier of any scheduler works — a cron job, GitHub Action, a Raspberry Pi):</p>
 <ol>
-<li>Every few hours, fetch each show'3 showrss feed.</li>
+<li>Every few hours, fetch each show's showrss feed.</li>
 <li>Parse items: title + magnet link.</li>
 <li>Pick the <strong>best quality per episode</strong> (one copy only — 2160p preferred, and skip "AI upscaled" releases: a native 2160p WEB-DL with Dolby Vision beats an upscaled 4320p re-encode every time).</li>
 <li>Check your existing torrents (match on season/episode parsed from titles) — skip what you have.</li>
