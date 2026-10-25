@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount TorBox storage with rclone over T3 (S3) — music servers, media libraries, read-only clouds</title>
+<meta name="description" content="The working rclone config for TorBox's T3 S3-compatible endpoint: endpoint, signature, addressing mode, the read-only gotcha, and how people run Navidrome/Lidarr-style music servers on top of it without local storage.">
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--dim:#9aa0a6;--acc:#4f8cff;--card:#171a21;--line:#262a33;--ok:#7ee787}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);max-width:760px;margin:0 auto;padding:24px 20px 80px}
+header{padding:36px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px}
+h1{font-size:1.8rem;line-height:1.25;letter-spacing:-.02em}
+header p{color:var(--dim);margin-top:10px}
+h2{font-size:1.3rem;margin:40px 0 12px}
+h3{font-size:1.05rem;margin:24px 0 8px}
+p,li{color:var(--fg)}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{background:var(--card);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:.9em}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;overflow-x:auto;font-size:.88em;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+ol li,ul li{margin:8px 0 8px 22px}
+.dim{color:var(--dim)}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--dim);font-size:.9em}
+.badge{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.8em;color:var(--dim);margin-right:6px}
+nav{margin:0 0 10px;font-size:.9em}
+</style>
+</head>
+<body>
+<nav><a href="/">&#8592; TorBox Setup Guide</a> · <a href="/addons.html">Addons</a> · <a href="/auto-episodes.html">Auto-episodes</a> · <a href="/black-friday.html">Black Friday</a></nav>
+<header>
+<span class="badge">Guide</span><span class="badge">Advanced</span>
+<h1>Mounting TorBox storage with rclone over T3 — the config that actually works</h1>
+<p>Your TorBox cloud, visible as a local drive, streaming your own library. The exact endpoint settings, the read-only reality, and the media-server patterns people run on it — tested, not theorized.</p>
+</header>
+
+<h2>What T3 is</h2>
+<p>T3 is TorBox's S3-compatible read endpoint for your cloud storage (AirLock + your downloads). Any tool that speaks S3 — rclone, Mountain Duck, scripted aws-cli calls — can list and fetch your files. The practical use: <strong>mount your TorBox library as a filesystem</strong> and point media software at it.</p>
+
+<h2>The rclone config that works</h2>
+<pre>[torbox]
+type = s3
+provider = Other
+endpoint = https://t3.nexus:443
+access_key_id = YOUR_AUTH_ID
+secret_access_key = YOUR_API_KEY
+region = us-east-1
+force_path_style = true</pre>
+<p>The four lines people get wrong:</p>
+<ul>
+<li><strong><code>endpoint = https://t3.nexus:443</code></strong> — not torbox.app, not api.torbox.app. The T3 host is its own thing.</li>
+<li><strong>Keys are swapped from what you'd guess:</strong> access key = your <em>Auth ID</em> (dashboard → settings), secret = your <em>API key</em>. Not two API keys.</li>
+<li><strong><code>force_path_style = true</code></strong> — virtual-hosted addressing (bucket.t3.nexus) doesn't resolve; path style does.</li>
+<li><strong>Signature:</strong> aws signature v4 (rclone default) works; no custom signer needed.</li>
+</ul>
+<p>Sanity check: <code>rclone lsd torbox:</code> should list your storage buckets immediately.</p>
+
+<h2>The read-only reality</h2>
+<div class="card">T3 is a <strong>read endpoint</strong>. You can list, download, and stream — you cannot upload, rename, or delete through it. New downloads still enter the cloud the normal way (web, API, RSS). Any workflow that "writes" to the mount needs a different design: organize by controlling what goes IN (see the music-server pattern below), not by moving files after.</div>
+
+<h2>Mounting</h2>
+<pre>rclone mount torbox: /Volumes/torbox \
+  --vfs-cache-mode full \
+  --vfs-cache-max-size 20G \
+  --read-only \
+  --daemon</pre>
+<ul>
+<li><strong><code>--vfs-cache-mode full</code></strong> is the important one for media: it caches file data locally as you stream, so seeks and scrubbing don't re-fetch ranges repeatedly. <code>minimal</code> works for plain sequential playback; <code>full</code> makes music servers and scrubbing usable.</li>
+<li><strong><code>--read-only</code></strong> — matches reality; prevents apps from trying writes that would silently fail.</li>
+<li>Cache size is your disk decision; 20G handles a few concurrent FLAC streams comfortably.</li>
+</ul>
+
+<h2>Pattern: music server without local storage (Navidrome-style)</h2>
+<p>The thing everyone asks: <em>"can I point a music server at TorBox and stream my FLACs?"</em> Yes — with one design rule. Since the mount is read-only, the library must arrive already-organized:</p>
+<ol>
+<li><strong>Organize at ingest, not after.</strong> Downloads land in whatever structure the torrent had. The trick people use: a small sync step that mirrors <code>torbox:Music/</code> into a local (or nas) folder structure <code>Artist/Album/track.flac</code> as files download — or manage the cloud side via the API so music lands in a Music folder you keep curated.</li>
+<li><strong>Point the server at the mount</strong> (or the synced mirror). Navidrome reads folder structure; it doesn't write, so read-only is fine.</li>
+<li><strong>Let the server's own database live locally</strong> — only point its <em>music folder</em> at the cloud. Databases on a network mount get slow and weird.</li>
+<li><strong>Upload tools (Lidarr-style)</strong> that want to move/rename files can't operate on the mount itself — they manage a local mirror, and the mirror is what the server reads. The cloud is the source that mirror syncs from.</li>
+</ol>
+<div class="card"><strong>The honest summary:</strong> T3 turns TorBox into a read-only NAS in the sky. Streaming, listing, syncing down: excellent. Using it as a writable drop target for library managers: not what it is. Design around read-only and it's genuinely great — a 1&nbsp;TB cloud slice mountable on every machine you own.</div>
+
+<h2>Streaming a single file without mounting</h2>
+<p>Don't need a mount? rclone can serve too:</p>
+<pre>rclone serve http torbox: --addr 127.0.0.1:8080</pre>
+<p>gives you a local HTTP file browser over the cloud — handy for one-off playback or fetching a file into an app that only speaks URLs.</p>
+
+<h2>Cost note</h2>
+<p>T3 access is included with the Pro plans that include AirLock storage. Setting up a new account? A referral link adds bonus days for both sides — <a href="https://torbox.app/subscription?referral=8ff32e87-03eb-4b24-91f9-b1e05f3aa04d" rel="noopener">here's mine</a>, or any community code from the <a href="/">main guide</a>.</p>
+
+<footer>
+<p>Independent guide — not affiliated with TorBox. One referral link, disclosed above. <a href="/">Main guide</a> · <a href="/auto-episodes.html">Auto-episodes</a> · <a href="/black-friday.html">Black Friday</a></p>
+</footer>
+</body>
+</html>
